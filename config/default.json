@@ -1,0 +1,7 @@
+{
+    "port": 3000,
+    "jwtSecret": "KondakovNodeJSTask",
+    "jwtSecretRefresh": "SomeRefreshToken",
+    "tokenTime": "5m",
+    "refreshTokenTime": "1h"
+}
