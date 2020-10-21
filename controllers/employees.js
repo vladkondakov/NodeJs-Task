@@ -1,9 +1,34 @@
 const Employee = require('../models/employee')
 const bcrypt = require('bcryptjs')
 
-const getAllEmployees = (req, res) => {
+const getEmployees = (req, res) => {
+
+    const page = parseInt(req.query.page)
+    const pagination = parseInt(req.query.pagination)
+    
+    const startIndex = (page - 1) * pagination
+    const endIndex = startIndex + pagination
+    
     const employees = Employee.getAll()
-    res.send(employees)
+    const results = {}
+
+    if (startIndex > 0) {
+        results.previous = {
+            page: page - 1,
+            pagination
+        }
+    }
+
+    if (endIndex < employees.length) {
+        results.next = {
+            page: page + 1,
+            pagination
+        }
+    }
+
+    results.pageEmployees = employees.slice(startIndex, endIndex)
+
+    res.send(results)
 }
 
 const getEmployee = (req, res) => {
@@ -32,7 +57,7 @@ const addEmployee = async (req, res) => {
 }
 
 module.exports = {
-    getAllEmployees,
+    getEmployees,
     getEmployee,
     editEmployee,
     addEmployee

@@ -44,7 +44,7 @@ class Employee {
     
     save() {
         const employees = Employee.getAll()
-        employees.push(this.toJSON())
+        employees.push(this)
         db.set('employees', employees).write()
     }
 

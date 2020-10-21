@@ -3,7 +3,7 @@ const EmployeesController = require('../controllers/employees')
 const { checkAuth } = require('../middleware/check-auth')
 
 // GET /employees/:login
-router.get('/:login', checkAuth, EmployeesController.getAllEmployees)
+router.get('/:login', checkAuth, EmployeesController.getEmployees)
 
 // GET /employees/:login/card
 router.get('/:login/card', checkAuth, EmployeesController.getEmployee)
