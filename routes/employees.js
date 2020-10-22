@@ -1,10 +1,11 @@
 const router = require('express').Router()
 const EmployeesController = require('../controllers/employees')
 const { checkAuth } = require('../middleware/check-auth')
-const { paginatedEmployees } = require('../middleware/paginated-employees')
+const { paginateEmployees } = require('../middleware/paginate-employees')
+const { sortEmployeesBySalary } = require('../middleware/sort-employees')
 
 // GET /employees/:login
-router.get('/:login', checkAuth, paginatedEmployees, EmployeesController.getEmployees)
+router.get('/:login', checkAuth, sortEmployeesBySalary, paginateEmployees, EmployeesController.getEmployees)
 
 // GET /employees/:login/card
 router.get('/:login/card', checkAuth, EmployeesController.getEmployee)
