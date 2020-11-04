@@ -1,12 +1,11 @@
-const Employee = require('../service/employee')
+const Employee = require('../service/employee-service')
 const bcrypt = require('bcryptjs')
 
-// Rewrite with paginate and sort logic
 const getEmployees = (req, res) => {
     try {
         const page = req.query.page ? parseInt(req.query.page) : 1
         const pagination = req.query.pagination ? parseInt(req.query.pagination) : 25
-        const order = req.query.order ? req.query.order : 'asc'
+        const order = req.query.order
 
         const employees = Employee.getSortedEmployees(order)
         const paginatedEmployees = Employee.getPaginatedEmployees(employees, page, pagination)
@@ -18,12 +17,12 @@ const getEmployees = (req, res) => {
 }
 
 const getEmployee = (req, res) => {
-    res.send(Employee.getByLogin(req.params.login))
+    res.send(Employee.getByLogin(req.params.id))
 }
 
 const editEmployee = async (req, res) => {
     let employee = req.body
-    const hashedPassword = await bcrypt.hash(req.body.password, 12)
+    const hashedPassword = await bcrypt.hash(employee.password, 12)
     employee.password = hashedPassword
     Employee.update(employee)
 

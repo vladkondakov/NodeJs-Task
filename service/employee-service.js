@@ -27,7 +27,6 @@ class Employee {
         db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
 
-    // Pay attention to password
     toJSON() {
         return ({
             login: this.login,
@@ -41,10 +40,6 @@ class Employee {
     }
     
     save() {
-        // const employees = Employee.getAll()
-        // employees.push(this)
-        // db.set('employees', employees).write()
-
         db.get('employees').push(this)
     }
 
@@ -54,7 +49,8 @@ class Employee {
         
         const descFunction = (a, b) => +b.salary - +a.salary
 
-        let employees = db.get('employees').value()
+        const employees = [... db.get('employees').value()]
+        // const employees = Object.assign([], db.get('employees').value())
         
         if (order) {
             const compareFunction = (order === 'desc' ? descFunction : ascFunction)
@@ -65,7 +61,7 @@ class Employee {
     }
 
     static getPaginatedEmployees(employees, page, pagination) {
-        const results = {}
+        let results = {}
         let startIndex = (page - 1) * pagination
         let endIndex = startIndex + pagination
 
