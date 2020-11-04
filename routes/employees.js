@@ -6,7 +6,7 @@ const { sortEmployeesBySalary } = require('../middleware/sort-employees')
 
 // GET /employees
 // Remove paginate and sort logics from middleware!!!
-router.get('/', checkAuth, sortEmployeesBySalary, paginateEmployees, EmployeesController.getEmployees)
+router.get('/', checkAuth, EmployeesController.getEmployees)
 
 // GET /employees/:login
 router.get('/:login', checkAuth, EmployeesController.getEmployee)

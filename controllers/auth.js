@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const config = require('config')
 const { validationResult } = require('express-validator')
-const Employee = require('../models/employee')
+const Employee = require('../service/employee')
 
 const lowDb = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')

@@ -1,19 +1,20 @@
-const Employee = require('../models/employee')
+const Employee = require('../service/employee')
 const bcrypt = require('bcryptjs')
 
 // Rewrite with paginate and sort logic
 const getEmployees = (req, res) => {
-    // try {
-    //     const page = req.params.page ? req.params.page : 1
-    //     const pagination = req.params.pagination ? req.params.pagination : 25
-        
-    //     const employees = 
-    // } catch (e) {
-    //     res.status(500).json({ message: "something wrong in getting employees" })
-    // }
+    try {
+        const page = req.query.page ? parseInt(req.query.page) : 1
+        const pagination = req.query.pagination ? parseInt(req.query.pagination) : 25
+        const order = req.query.order ? req.query.order : 'asc'
 
+        const employees = Employee.getSortedEmployees(order)
+        const paginatedEmployees = Employee.getPaginatedEmployees(employees, page, pagination)
 
-    res.send(res.paginatedEmployees)
+        res.json({ paginatedEmployees })
+    } catch (e) {
+        res.status(500).json({ message: "something wrong in getting employees" })
+    }
 }
 
 const getEmployee = (req, res) => {

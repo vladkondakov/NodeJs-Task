@@ -13,22 +13,17 @@ class Employee {
         this.salary = salary
     }
 
-    static getAll() {
-        return db.get('employees').value()
-    } 
+    // static getAll() {
+    //     return db.get('employees').value()
+    // } 
 
     static getByLogin(login) {
-        // const employees = Employee.getAll()
         const employees = db.get('employees').value()
         // return db.get('employees').find({ login: login })
         return employees.find(c => c.login === login)
     }
 
     static update(employee) {
-        // const employees = db.get('employees').value()
-        // const idx = employees.findIndex(c => c.login === employee.login)
-        // employees[idx] = employee
-        // db.set('employees', employees).write()
         db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
 
@@ -51,6 +46,45 @@ class Employee {
         // db.set('employees', employees).write()
 
         db.get('employees').push(this)
+    }
+
+    // By salary
+    static getSortedEmployees(order) {
+        const ascFunction = (a, b) => +a.salary - +b.salary
+        
+        const descFunction = (a, b) => +b.salary - +a.salary
+
+        let employees = db.get('employees').value()
+        
+        if (order) {
+            const compareFunction = (order === 'desc' ? descFunction : ascFunction)
+            return employees.sort(compareFunction)
+        }
+
+        return employees
+    }
+
+    static getPaginatedEmployees(employees, page, pagination) {
+        const results = {}
+        let startIndex = (page - 1) * pagination
+        let endIndex = startIndex + pagination
+
+        if (startIndex > 0) {
+            results.previous = {
+                page: page - 1,
+                pagination
+            }
+        }
+
+        if (endIndex < employees.length) {
+            results.next = {
+                page: page + 1,
+                pagination
+            }
+        }
+        results.pageEmployees = employees.slice(startIndex, endIndex)
+        
+        return results
     }
 
 }
