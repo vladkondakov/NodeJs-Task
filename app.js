@@ -7,7 +7,6 @@ const startRoute = require('./routes/start-page')
 const bearerToken = require('express-bearer-token')
 const app = express()
 
-//notice about bearerToken
 app.use(bearerToken())
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(bodyParser.json())

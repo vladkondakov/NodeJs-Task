@@ -6,7 +6,7 @@ exports.sortEmployeesBySalary = (req, res, next) => {
         let employees = Employee.getAll()
         const orderBy = req.query.orderBy
 
-        const compareFunction = (orderBy === 'asc' ? ascFunction : descFunction)
+        const compareFunction = (orderBy === 'desc' ? descFunction : ascFunction)
         employees.sort(compareFunction)
         
         res.sortedEmployees = employees

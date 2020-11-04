@@ -18,15 +18,18 @@ class Employee {
     } 
 
     static getByLogin(login) {
-        const employees = Employee.getAll()
+        // const employees = Employee.getAll()
+        const employees = db.get('employees').value()
+        // return db.get('employees').find({ login: login })
         return employees.find(c => c.login === login)
     }
 
     static update(employee) {
-        const employees = Employee.getAll()
-        const idx = employees.findIndex(c => c.login === employee.login)
-        employees[idx] = employee
-        db.set('employees', employees).write()
+        // const employees = db.get('employees').value()
+        // const idx = employees.findIndex(c => c.login === employee.login)
+        // employees[idx] = employee
+        // db.set('employees', employees).write()
+        db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
 
     // Pay attention to password
@@ -43,9 +46,11 @@ class Employee {
     }
     
     save() {
-        const employees = Employee.getAll()
-        employees.push(this)
-        db.set('employees', employees).write()
+        // const employees = Employee.getAll()
+        // employees.push(this)
+        // db.set('employees', employees).write()
+
+        db.get('employees').push(this)
     }
 
 }

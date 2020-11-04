@@ -4,17 +4,18 @@ const { checkAuth } = require('../middleware/check-auth')
 const { paginateEmployees } = require('../middleware/paginate-employees')
 const { sortEmployeesBySalary } = require('../middleware/sort-employees')
 
+// GET /employees
+// Remove paginate and sort logics from middleware!!!
+router.get('/', checkAuth, sortEmployeesBySalary, paginateEmployees, EmployeesController.getEmployees)
+
 // GET /employees/:login
-router.get('/:login', checkAuth, sortEmployeesBySalary, paginateEmployees, EmployeesController.getEmployees)
+router.get('/:login', checkAuth, EmployeesController.getEmployee)
 
-// GET /employees/:login/card
-router.get('/:login/card', checkAuth, EmployeesController.getEmployee)
+// POST /employees/:login
+router.post('/:login', checkAuth, EmployeesController.editEmployee)
 
-// POST /employees/:login/card
-router.post('/:login/card', checkAuth, EmployeesController.editEmployee)
-
-// PUT /employees/new-user
-// This is for admin (create check for admin?)
-router.put('/new-user', EmployeesController.addEmployee)
+// PUT /employees/
+// This is for admin, only for development
+router.put('/', EmployeesController.addEmployee)
 
 module.exports = router

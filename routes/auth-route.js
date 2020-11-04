@@ -2,9 +2,9 @@ const router = require('express').Router()
 const { check } = require('express-validator')
 const AuthController = require('../controllers/auth')
 
-// POST /auth/login
+// POST /auth
 router.post(
-    '/login',
+    '/',
     [
         check('login').exists(),
         check('password').exists()
@@ -15,8 +15,8 @@ router.post(
 // POST /auth/refresh
 router.post('/refresh', AuthController.generateNewToken)
 
-// DELETE auth/logout
+// DELETE /auth
 //header
-router.delete('/logout', AuthController.logout)
+router.delete('/', AuthController.logout)
 
 module.exports = router

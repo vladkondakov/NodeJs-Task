@@ -30,6 +30,7 @@ exports.paginateEmployees = (req, res, next) => {
 
     results.pageEmployees = employees.slice(startIndex, endIndex)
     res.paginatedEmployees = results
-    next()
+    
+    return next()
 }
 

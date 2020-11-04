@@ -20,11 +20,11 @@ const login = async (req, res) => {
 
         const { login, password } = req.body
         const employee = Employee.getByLogin(login)
-
+        
         if(!employee) {
             return res.status(400).json({ message: 'No such employee' })
         }
-
+        
         if(!(await bcrypt.compare(password, employee.password))) {
             return res.status(400).json({ message: 'Wrong password' })
         }
@@ -34,17 +34,15 @@ const login = async (req, res) => {
             config.get('jwtSecret'),
             { expiresIn: config.get('tokenTime') }    
         )
-            
+        
         const refreshToken = jwt.sign(
             { login },
             config.get('jwtSecretRefresh'),
             { expiresIn: config.get('refreshTokenTime') }
         )
-
-        let refreshTokens = db.get('refreshTokens').value()
-        refreshTokens.push(refreshToken)
-        db.set('refreshTokens', refreshTokens).write()
-
+        
+        db.get('refreshTokens').push(refreshToken).write()
+        
         res.json({
             status: "Logged in",
             token,
@@ -87,11 +85,9 @@ const generateNewToken = (req, res) => {
 }
 
 const logout = (req, res) => {
-    let refreshTokens = db.get('refreshTokens').value()
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token)
-    db.set('refreshTokens', refreshTokens).write()
-    
-    res.redirect('/')
+    // pull? Read about it, but now it works, fine
+    db.get('refreshTokens').pull(req.body.token).write()
+    res.json({ status: "Logged out" })
 }
 
 module.exports = {
