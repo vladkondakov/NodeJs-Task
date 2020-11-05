@@ -1,28 +1,41 @@
+const { date } = require('joi')
 const lowDb = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const db = lowDb(new FileSync('db.json'))
 
 class Employee {
     constructor(login, password, name, surname, dateOfBirth, position, salary) {
-        this.login = login
-        this.password = password
-        this.name = name
-        this.surname = surname
-        this.dateOfBirth = dateOfBirth
-        this.position = position
-        this.salary = salary
-    }
 
-    // static getAll() {
-    //     return db.get('employees').value()
-    // } 
+        if (arguments.length === 7) {
+            this.login = login
+            this.password = password
+            this.name = name
+            this.surname = surname
+            this.dateOfBirth = dateOfBirth
+            this.position = position
+            this.salary = salary
+        } else {
+            this.name = arguments[0]
+            this.surname = arguments[1]
+            this.dateOfBirth = arguments[2]
+            this.position = arguments[3]
+            this.salary = arguments[4]
+        }
+    }
 
     static getByLogin(login) {
-        const employees = db.get('employees').value()
-        // return db.get('employees').find({ login: login })
-        return employees.find(c => c.login === login)
+        const employee = db.get('employees').find({ login: login }).value()
+        const result = new Employee(
+            employee.name, 
+            employee.surname, 
+            employee.dateOfBirth, 
+            employee.position, 
+            employee.salary
+        )
+        
+        return result
     }
-
+    
     static update(employee) {
         db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
@@ -38,24 +51,39 @@ class Employee {
             salary: this.salary
         })
     }
-    
+
     save() {
         db.get('employees').push(this)
+    }
+
+    static getAllEmployees() {
+        const employees = [...db.get('employees').value()]
+        const results = employees.map(employee => new Employee(
+            employee.name, 
+            employee.surname, 
+            employee.dateOfBirth, 
+            employee.position, 
+            employee.salary
+        ));
+        
+        return results
     }
 
     // By salary
     static getSortedEmployees(order) {
         const ascFunction = (a, b) => +a.salary - +b.salary
-        
         const descFunction = (a, b) => +b.salary - +a.salary
 
-        const employees = [... db.get('employees').value()]
+        const employees = Employee.getAllEmployees()
+        // const employees = [...db.get('employees').value()]
         // const employees = Object.assign([], db.get('employees').value())
-        
+
         if (order) {
             const compareFunction = (order === 'desc' ? descFunction : ascFunction)
             return employees.sort(compareFunction)
         }
+
+        db.get('employees')
 
         return employees
     }
@@ -79,7 +107,7 @@ class Employee {
             }
         }
         results.pageEmployees = employees.slice(startIndex, endIndex)
-        
+
         return results
     }
 

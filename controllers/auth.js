@@ -17,15 +17,15 @@ const login = async (req, res) => {
                 message: 'Wrong login or password'
             })
         }
-
+        
         const { login, password } = req.body
         const employee = Employee.getByLogin(login)
         
-        if(!employee) {
+        if (!employee) {
             return res.status(400).json({ message: 'No such employee' })
         }
         
-        if(!(await bcrypt.compare(password, employee.password))) {
+        if (!(await bcrypt.compare(password, employee.password))) {
             return res.status(400).json({ message: 'Wrong password' })
         }
         
@@ -34,7 +34,7 @@ const login = async (req, res) => {
             config.get('jwtSecret'),
             { expiresIn: config.get('tokenTime') }    
         )
-        
+
         const refreshToken = jwt.sign(
             { login },
             config.get('jwtSecretRefresh'),
