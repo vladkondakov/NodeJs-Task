@@ -39,11 +39,12 @@ const editEmployee = async (req, res) => {
 
 }
 
+//
 const addEmployee = async (req, res) => {
     try {
-        const { login, password, name, surname, dateOfBirth, position, salary } = req.body
+        const { password, ...restProps } = req.body
         const hashedPassword = await bcrypt.hash(password, 12)
-        const employee = new Employee(login, hashedPassword, name, surname, dateOfBirth, position, salary)
+        const employee = new Employee({ password: hashedPassword, ...restProps })
         employee.save()
         res.json({ message: "employee was successfully added" })
     } catch (e) {

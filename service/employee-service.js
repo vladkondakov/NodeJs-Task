@@ -4,38 +4,38 @@ const FileSync = require('lowdb/adapters/FileSync')
 const db = lowDb(new FileSync('db.json'))
 
 class Employee {
-    constructor(login, password, name, surname, dateOfBirth, position, salary) {
 
-        if (arguments.length === 7) {
-            this.login = login
-            this.password = password
-            this.name = name
-            this.surname = surname
-            this.dateOfBirth = dateOfBirth
-            this.position = position
-            this.salary = salary
-        } else {
-            this.name = arguments[0]
-            this.surname = arguments[1]
-            this.dateOfBirth = arguments[2]
-            this.position = arguments[3]
-            this.salary = arguments[4]
+    constructor(employeeData) {
+        if (employeeData.login && employeeData.password) {
+            this.login = employeeData.login
+            this.password = employeeData.password
         }
+
+        this.name = employeeData.name
+        this.surname = employeeData.surname
+        this.dateOfBirth = employeeData.dateOfBirth
+        this.position = employeeData.position
+        this.salary = employeeData.salary
     }
 
     static getByLogin(login) {
         const employee = db.get('employees').find({ login: login }).value()
-        const result = new Employee(
-            employee.name, 
-            employee.surname, 
-            employee.dateOfBirth, 
-            employee.position, 
-            employee.salary
-        )
-        
+        const result = new Employee({
+            name: employee.name,
+            surname: employee.surname,
+            dateOfBirth: employee.dateOfBirth,
+            position: employee.position,
+            salary: employee.salary
+        })
+
         return result
     }
-    
+
+    static getByLoginAllInfo(login) {
+        const employee = db.get('employees').find({ login: login }).value()
+        return employee
+    }
+
     static update(employee) {
         db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
@@ -58,14 +58,14 @@ class Employee {
 
     static getAllEmployees() {
         const employees = [...db.get('employees').value()]
-        const results = employees.map(employee => new Employee(
-            employee.name, 
-            employee.surname, 
-            employee.dateOfBirth, 
-            employee.position, 
-            employee.salary
-        ));
-        
+        const results = employees.map(employee => new Employee({
+            name: employee.name,
+            surname: employee.surname,
+            dateOfBirth: employee.dateOfBirth,
+            position: employee.position,
+            salary: employee.salary
+        }));
+
         return results
     }
 

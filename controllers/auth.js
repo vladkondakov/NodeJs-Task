@@ -19,7 +19,7 @@ const login = async (req, res) => {
         }
         
         const { login, password } = req.body
-        const employee = Employee.getByLogin(login)
+        const employee = Employee.getByLoginAllInfo(login)
         
         if (!employee) {
             return res.status(400).json({ message: 'No such employee' })
