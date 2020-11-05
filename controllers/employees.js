@@ -1,6 +1,5 @@
 const Employee = require('../service/employee-service')
 const bcrypt = require('bcryptjs')
-const { employeeSchema } = require('../helpers/validation-schema')
 
 const getPageEmployees = (req, res) => {
     try {
@@ -13,33 +12,34 @@ const getPageEmployees = (req, res) => {
 
         res.json({ paginatedEmployees })
     } catch (e) {
-        res.status(500).json({ message: "something wrong in getting employees" })
+        res.status(500).json({ message: "Something wrong in getting employees" })
     }
 }
 
 const getEmployee = (req, res) => {
-    res.send(Employee.getByLogin(req.params.id))
+    try {
+        res.send(Employee.getByLogin(req.params.id))
+    } catch (e) {
+        res.status(500).json({ message: "Something wrong in getting employee" })
+    }
 }
 
 const editEmployee = async (req, res) => {
     try {
         const employee = req.body
-        const login = req.params.id
-        
-        const result = await employeeSchema.validateAsync(employee)
-        
-        employee.login = login
+        const id = req.params.id
+
+        employee.login = id
         Employee.update(employee)
 
-        res.redirect(`/employees/${employee.login}`)
+        res.redirect(`/employees/${id}`)
     } catch (e) {
-        // res.status(422).json({message: "Validate Error"})
-        res.send(e.message)
+        res.status(500).json({message: "Something wrong in editing employee"})
     }
 
 }
 
-//
+// Only for development
 const addEmployee = async (req, res) => {
     try {
         const { password, ...restProps } = req.body

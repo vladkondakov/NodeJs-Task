@@ -6,16 +6,7 @@ const db = lowDb(new FileSync('db.json'))
 class Employee {
 
     constructor(employeeData) {
-        if (employeeData.login && employeeData.password) {
-            this.login = employeeData.login
-            this.password = employeeData.password
-        }
-
-        this.name = employeeData.name
-        this.surname = employeeData.surname
-        this.dateOfBirth = employeeData.dateOfBirth
-        this.position = employeeData.position
-        this.salary = employeeData.salary
+        Object.assign(this, employeeData)
     }
 
     static getByLogin(login) {
@@ -40,22 +31,6 @@ class Employee {
         db.get('employees').find({ login: employee.login }).assign(employee).write()
     }
 
-    toJSON() {
-        return ({
-            login: this.login,
-            password: this.password,
-            name: this.name,
-            surname: this.surname,
-            dateOfBirth: this.dateOfBirth,
-            position: this.position,
-            salary: this.salary
-        })
-    }
-
-    save() {
-        db.get('employees').push(this)
-    }
-
     static getAllEmployees() {
         const employees = [...db.get('employees').value()]
         const results = employees.map(employee => new Employee({
@@ -65,7 +40,7 @@ class Employee {
             position: employee.position,
             salary: employee.salary
         }));
-
+        
         return results
     }
 
@@ -109,6 +84,23 @@ class Employee {
         results.pageEmployees = employees.slice(startIndex, endIndex)
 
         return results
+    }
+
+    //Last methods not useful
+    // toJSON() {
+    //     return ({
+    //         login: this.login,
+    //         password: this.password,
+    //         name: this.name,
+    //         surname: this.surname,
+    //         dateOfBirth: this.dateOfBirth,
+    //         position: this.position,
+    //         salary: this.salary
+    //     })
+    // }
+
+    save() {
+        db.get('employees').push(this)
     }
 
 }
