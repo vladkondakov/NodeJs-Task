@@ -16,7 +16,6 @@ router.post(
 router.post('/refresh', AuthController.generateNewToken)
 
 // DELETE /auth
-//header
 router.delete('/', AuthController.logout)
 
 module.exports = router

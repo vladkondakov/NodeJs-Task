@@ -1,18 +1,22 @@
-const jwt = require('jsonwebtoken')
-const config = require('config')
+const jwt = require('jsonwebtoken');
+const config = require('config');
+const ApiError = require('../error/apierror');
 
 exports.checkAuth = function(req, res, next) {
-    const authHeader = req.headers['authorization']
+    const authHeader = req.headers['authorization'];
     if (!authHeader) {
-        return res.status(401).json({ message: "the request is unauthorized" })
+        return next(ApiError.unauthorized("The request is unauthorized"));
     }
     
-    const bearerToken = authHeader.split(' ')[1]
-    req.token = bearerToken
+    const bearerToken = authHeader.split(' ')[1];
+    req.token = bearerToken;
 
     jwt.verify(bearerToken, config.jwtSecret, (err, login) => {
-        if (err) return res.status(401).json({ message: "can't verify token" })
-        req.login = login
-        return next()
+        if (err) {
+            return next(ApiError.forbidden("Can't verify token"));
+        }    
+        
+        req.login = login;
+        return next();
     })
 }

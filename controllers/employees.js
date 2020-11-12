@@ -1,54 +1,67 @@
-const Employee = require('../service/employee-service')
-const bcrypt = require('bcryptjs')
+const Employee = require('../service/employee-service');
+const bcrypt = require('bcryptjs');
+const ApiError = require('../error/apierror');
 
-const getPageEmployees = (req, res) => {
+const getPageEmployees = (req, res, next) => {
+    const page = parseInt(req.query.page) || 1;
+    const pagination = parseInt(req.query.pagination) || 25;
+    const order = req.query.order;
+    // const name = req.query.name;
+    // const surname = req.query.surname;
+
     try {
-        const page = req.query.page ? parseInt(req.query.page) : 1
-        const pagination = req.query.pagination ? parseInt(req.query.pagination) : 25
-        const order = req.query.order
-
-        const employees = Employee.getSortedEmployees(order)
-        const paginatedEmployees = Employee.getPaginatedEmployees(employees, page, pagination)
-
-        res.json({ paginatedEmployees })
+        // const filteredEmployees = Employee.getFilteredEmployees(name, surname);
+        const sortedEmployees = Employee.getSortedEmployees(order);
+        const paginatedEmployees = Employee.getPaginatedEmployees(sortedEmployees, page, pagination);
+        res.json({ paginatedEmployees });
     } catch (e) {
-        res.status(500).json({ message: "Something wrong in getting employees" })
+        return next({ message: "Something is wrong with getting paginated employees" })
     }
 }
 
-const getEmployee = (req, res) => {
+const getEmployee = (req, res, next) => {
     try {
-        res.send(Employee.getByLogin(req.params.id))
+        const employee = Employee.getByLogin(req.params.id);
+
+        if (!employee) {
+            return next(ApiError.notFound(`Can't find employee with id: ${req.params.id}`));
+        }
+
+        res.send(employee);
     } catch (e) {
-        res.status(500).json({ message: "Something wrong in getting employee" })
+        return next({ message: "Something is wrong with getting employee" });
     }
 }
 
-const editEmployee = async (req, res) => {
+const editEmployee = (req, res, next) => {
     try {
-        const employee = req.body
-        const id = req.params.id
+        const employee = req.body;
+        const id = req.params.id;
 
-        employee.login = id
-        Employee.update(employee)
+        employee.login = id;
+        const info = Employee.update(employee);
 
-        res.redirect(`/employees/${id}`)
+        if (info.isUpdated === false) {
+            return next(ApiError.notFound("Can't find and update employee"));
+        }
+
+        res.redirect(`/employees/${id}`);
     } catch (e) {
-        res.status(500).json({message: "Something wrong in editing employee"})
+        return next({ message: "Something is wrong in editing employee" });
     }
 
 }
 
 // Only for development
-const addEmployee = async (req, res) => {
+const addEmployee = async (req, res, next) => {
     try {
-        const { password, ...restProps } = req.body
-        const hashedPassword = await bcrypt.hash(password, 12)
-        const employee = new Employee({ password: hashedPassword, ...restProps })
-        employee.save()
-        res.json({ message: "employee was successfully added" })
+        const { password, ...restProps } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const employee = { password: hashedPassword, ...restProps };
+        employee.save();
+        res.json({ message: "employee was successfully added" });
     } catch (e) {
-        res.status(500).json({ message: "something wrong in adding" })
+        res.status(500).json({ message: "something is wrong in adding" });
     }
 }
 

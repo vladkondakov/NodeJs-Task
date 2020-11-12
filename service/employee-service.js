@@ -1,103 +1,118 @@
-const { date } = require('joi')
-const lowDb = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-const db = lowDb(new FileSync('db.json'))
+const lowDb = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
+const db = lowDb(new FileSync('db.json'));
 
 class Employee {
-
-    constructor(employeeData) {
-        Object.assign(this, employeeData)
-    }
-
+    //объединить
     static getByLogin(login) {
-        const employee = db.get('employees').find({ login: login }).value()
-        const result = new Employee({
-            name: employee.name,
-            surname: employee.surname,
-            dateOfBirth: employee.dateOfBirth,
-            position: employee.position,
-            salary: employee.salary
-        })
+        const employee = db.get('employees').find({ login }).value()
 
-        return result
+        if (employee) {
+            const result = {
+                name: employee.name,
+                surname: employee.surname,
+                dateOfBirth: employee.dateOfBirth,
+                position: employee.position,
+                salary: employee.salary
+            };
+            return result;
+        }
+        return employee;
     }
 
     static getByLoginAllInfo(login) {
-        const employee = db.get('employees').find({ login: login }).value()
-        return employee
+        const employee = db.get('employees').find({ login }).value();
+        return employee;
     }
 
     static update(employee) {
-        db.get('employees').find({ login: employee.login }).assign(employee).write()
+        const res = this.getByLogin(employee.login);
+        if (!res) {
+            return { isUpdated: false };
+        }
+
+        db.get('employees').find({ login: employee.login }).assign(employee).write();
+        return { isUpdated: true };
     }
 
     static getAllEmployees() {
-        const employees = [...db.get('employees').value()]
-        const results = employees.map(employee => new Employee({
+        const employees = [...db.get('employees').value()];
+        const results = employees.map(employee => ({
             name: employee.name,
             surname: employee.surname,
             dateOfBirth: employee.dateOfBirth,
             position: employee.position,
             salary: employee.salary
         }));
-        
-        return results
+
+        return results;
     }
 
-    // By salary
-    static getSortedEmployees(order) {
-        const ascFunction = (a, b) => +a.salary - +b.salary
-        const descFunction = (a, b) => +b.salary - +a.salary
+    static getFilteredEmployees(name, surname) {
+        const employees = this.getAllEmployees();
 
-        const employees = Employee.getAllEmployees()
+        if (!name && !surname) {
+            return employees;
+        }
+
+        const filteredEmployees = employees.filter(employee => {
+            const isNamesEquals = employee.name === name;
+            const isSurnamesEquals = employee.surname === surname;
+
+            if (name) {
+                if (surname) {
+                    return isNamesEquals && isSurnamesEquals;
+                }
+
+                return isNamesEquals;
+            } else if (surname) {
+                return isSurnamesEquals;
+            }
+        });
+
+        return filteredEmployees;
+    }
+
+    // By salary   
+    static getSortedEmployees(order) {
+        const ascFunction = (a, b) => +a.salary - +b.salary;
+        const descFunction = (a, b) => +b.salary - +a.salary;
+
+        const employees = this.getAllEmployees();
         // const employees = [...db.get('employees').value()]
         // const employees = Object.assign([], db.get('employees').value())
 
         if (order) {
-            const compareFunction = (order === 'desc' ? descFunction : ascFunction)
-            return employees.sort(compareFunction)
+            const compareFunction = (order === 'desc' ? descFunction : ascFunction);
+            return employees.sort(compareFunction);
         }
-
-        db.get('employees')
-
-        return employees
+        return employees;
     }
 
+    //rename pagination
     static getPaginatedEmployees(employees, page, pagination) {
-        let results = {}
-        let startIndex = (page - 1) * pagination
-        let endIndex = startIndex + pagination
+        let results = {};
+        let startIndex = (page - 1) * pagination;
+        let endIndex = startIndex + pagination;
 
         if (startIndex > 0) {
             results.previous = {
                 page: page - 1,
                 pagination
-            }
+            };
         }
 
         if (endIndex < employees.length) {
             results.next = {
                 page: page + 1,
                 pagination
-            }
+            };
         }
-        results.pageEmployees = employees.slice(startIndex, endIndex)
 
-        return results
+        results.pageEmployees = employees.slice(startIndex, endIndex);
+
+        return results;
     }
-
-    //Last methods not useful
-    // toJSON() {
-    //     return ({
-    //         login: this.login,
-    //         password: this.password,
-    //         name: this.name,
-    //         surname: this.surname,
-    //         dateOfBirth: this.dateOfBirth,
-    //         position: this.position,
-    //         salary: this.salary
-    //     })
-    // }
 
     save() {
         db.get('employees').push(this)

@@ -6,6 +6,7 @@ const employeesRoute = require('./routes/employees-route')
 const startRoute = require('./routes/start-page')
 const bearerToken = require('express-bearer-token')
 const app = express()
+const apiErrorHandler = require('./error/apierror-handler')
 
 app.use(bearerToken())
 app.use(bodyParser.urlencoded({ extended: false}));
@@ -13,6 +14,8 @@ app.use(bodyParser.json())
 app.use('/', startRoute) 
 app.use('/auth', authRoute)
 app.use('/employees', employeesRoute)
+
+app.use(apiErrorHandler);
 
 const PORT = config.get('port') || 8000
 
