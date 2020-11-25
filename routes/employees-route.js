@@ -9,9 +9,8 @@ router.get('/', checkAuth, EmployeesController.getPageEmployees);
 // GET /employees/:id
 router.get('/:id', checkAuth, EmployeesController.getEmployee);
 
-// POST /employees
-//put
-router.post('/:id', checkAuth, employeeValidation, EmployeesController.editEmployee);
+// PUT /employees/:id
+router.put('/:id', checkAuth, employeeValidation, EmployeesController.editEmployee);
 
 // PUT /employees
 // This is for admin, only for development

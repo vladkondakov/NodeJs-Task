@@ -17,7 +17,7 @@ app.use('/employees', employeesRoute)
 
 app.use(apiErrorHandler);
 
-const PORT = config.get('port') || 8000
+const PORT = config.get('port') || 3000
 
 const start = async () => {
     try {

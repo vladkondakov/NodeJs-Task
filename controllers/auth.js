@@ -17,7 +17,7 @@ const login = async (req, res, next) => {
         }
 
         const { login, password } = req.body;
-        const employee = Employee.getByLoginAllInfo(login);
+        const employee = Employee.getByIdAllInfo(login);
 
         if (!employee || !(await bcrypt.compare(password, employee.password))) {
             return next(ApiError.notFound("Wrong login or password"));

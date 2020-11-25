@@ -3,30 +3,28 @@ const bcrypt = require('bcryptjs');
 const ApiError = require('../error/apierror');
 
 const getPageEmployees = (req, res, next) => {
-    const page = parseInt(req.query.page) || 1;
-    const pagination = parseInt(req.query.pagination) || 25;
+    const offset = parseInt(req.query.offset) || 1;
+    const limit = parseInt(req.query.limit) || 25;
     const order = req.query.order;
-    // const name = req.query.name;
-    // const surname = req.query.surname;
+    const name = req.query.name || "";
+    const surname = req.query.surname || "";
 
     try {
-        // const filteredEmployees = Employee.getFilteredEmployees(name, surname);
-        const sortedEmployees = Employee.getSortedEmployees(order);
-        const paginatedEmployees = Employee.getPaginatedEmployees(sortedEmployees, page, pagination);
-        res.json({ paginatedEmployees });
+        const filteredEmployees = Employee.getFilteredEmployees(name, surname);
+        const sortedEmployees = Employee.getSortedEmployees(filteredEmployees, order);
+        const pageEmployees = Employee.getPageEmployees(sortedEmployees, offset, limit);
+        res.json({ pageEmployees });
     } catch (e) {
-        return next({ message: "Something is wrong with getting paginated employees" })
+        return next({message: "Can't get employees"});
     }
 }
 
 const getEmployee = (req, res, next) => {
     try {
-        const employee = Employee.getByLogin(req.params.id);
-
+        const employee = Employee.getById(req.params.id);
         if (!employee) {
             return next(ApiError.notFound(`Can't find employee with id: ${req.params.id}`));
         }
-
         res.send(employee);
     } catch (e) {
         return next({ message: "Something is wrong with getting employee" });
@@ -38,11 +36,11 @@ const editEmployee = (req, res, next) => {
         const employee = req.body;
         const id = req.params.id;
 
-        employee.login = id;
-        const info = Employee.update(employee);
+        employee.id = id;
+        const isUpdated = Employee.update(employee);
 
-        if (info.isUpdated === false) {
-            return next(ApiError.notFound("Can't find and update employee"));
+        if (!isUpdated) {
+            return next(ApiError.notFound("Can't find and update employee, check the user's id"));
         }
 
         res.redirect(`/employees/${id}`);

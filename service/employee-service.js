@@ -2,49 +2,34 @@ const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('db.json'));
 
-class Employee {
-    //объединить
-    static getByLogin(login) {
-        const employee = db.get('employees').find({ login }).value()
+const { employeeMapper } = require('../helpers/employee-mapper')
 
-        if (employee) {
-            const result = {
-                name: employee.name,
-                surname: employee.surname,
-                dateOfBirth: employee.dateOfBirth,
-                position: employee.position,
-                salary: employee.salary
-            };
-            return result;
-        }
-        return employee;
+class Employee {
+    static getById(id) {
+        const employee = db.get('employees').find({ id }).value()
+        const res = employee ? employeeMapper(employee) : employee;
+        return res
     }
 
-    static getByLoginAllInfo(login) {
-        const employee = db.get('employees').find({ login }).value();
+    static getByIdAllInfo(id) {
+        const employee = db.get('employees').find({ id }).value();
         return employee;
     }
 
     static update(employee) {
-        const res = this.getByLogin(employee.login);
-        if (!res) {
-            return { isUpdated: false };
-        }
+        const res = this.getById(employee.id);
+        let isUpdated = true;
 
-        db.get('employees').find({ login: employee.login }).assign(employee).write();
-        return { isUpdated: true };
+        if (res) {
+            db.get('employees').find({ id: employee.id }).assign(employee).write();
+            return !isUpdated
+        }
+        return isUpdated;
     }
 
     static getAllEmployees() {
         const employees = [...db.get('employees').value()];
-        const results = employees.map(employee => ({
-            name: employee.name,
-            surname: employee.surname,
-            dateOfBirth: employee.dateOfBirth,
-            position: employee.position,
-            salary: employee.salary
-        }));
-
+        const results = employees.map(employee => employeeMapper(employee));
         return results;
     }
 
@@ -56,8 +41,8 @@ class Employee {
         }
 
         const filteredEmployees = employees.filter(employee => {
-            const isNamesEquals = employee.name === name;
-            const isSurnamesEquals = employee.surname === surname;
+            const isNamesEquals = employee.name.toLowerCase() === name.toLowerCase();
+            const isSurnamesEquals = employee.surname.toLowerCase() === surname.toLowerCase();
 
             if (name) {
                 if (surname) {
@@ -74,43 +59,38 @@ class Employee {
     }
 
     // By salary   
-    static getSortedEmployees(order) {
+    static getSortedEmployees(filteredEmployees, order) {
         const ascFunction = (a, b) => +a.salary - +b.salary;
         const descFunction = (a, b) => +b.salary - +a.salary;
 
-        const employees = this.getAllEmployees();
-        // const employees = [...db.get('employees').value()]
-        // const employees = Object.assign([], db.get('employees').value())
-
         if (order) {
             const compareFunction = (order === 'desc' ? descFunction : ascFunction);
-            return employees.sort(compareFunction);
+            return filteredEmployees.sort(compareFunction);
         }
-        return employees;
+
+        return filteredEmployees;
     }
 
-    //rename pagination
-    static getPaginatedEmployees(employees, page, pagination) {
+    static getPageEmployees(employees, offset, limit) {
         let results = {};
-        let startIndex = (page - 1) * pagination;
-        let endIndex = startIndex + pagination;
+        let startIndex = (offset - 1) * limit;
+        let endIndex = startIndex + limit;
 
         if (startIndex > 0) {
             results.previous = {
-                page: page - 1,
-                pagination
+                offset: offset - 1,
+                limit
             };
         }
 
         if (endIndex < employees.length) {
             results.next = {
-                page: page + 1,
-                pagination
+                offset: offset + 1,
+                limit
             };
         }
 
         results.pageEmployees = employees.slice(startIndex, endIndex);
-
         return results;
     }
 
