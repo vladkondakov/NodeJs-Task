@@ -18,7 +18,7 @@ class Employee {
 
     static update(employee) {
         const res = this.getById(employee.id);
-        let isUpdated = true;
+        let isUpdated = false;
 
         if (res) {
             db.get('employees').find({ id: employee.id }).assign(employee).write();

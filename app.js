@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const authRoute = require('./routes/auth-route')
 const employeesRoute = require('./routes/employees-route')
 const startRoute = require('./routes/start-page')
+const anotherRoutes = require('./routes/another-routes')
 const bearerToken = require('express-bearer-token')
 const app = express()
 const apiErrorHandler = require('./error/apierror-handler')
@@ -14,6 +15,7 @@ app.use(bodyParser.json())
 app.use('/', startRoute) 
 app.use('/auth', authRoute)
 app.use('/employees', employeesRoute)
+app.use('*', anotherRoutes)
 
 app.use(apiErrorHandler);
 

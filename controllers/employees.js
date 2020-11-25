@@ -15,39 +15,31 @@ const getPageEmployees = (req, res, next) => {
         const pageEmployees = Employee.getPageEmployees(sortedEmployees, offset, limit);
         res.json({ pageEmployees });
     } catch (e) {
-        return next({message: "Can't get employees"});
+        return next({ message: "Can't get employees" });
     }
 }
 
 const getEmployee = (req, res, next) => {
-    try {
-        const employee = Employee.getById(req.params.id);
-        if (!employee) {
-            return next(ApiError.notFound(`Can't find employee with id: ${req.params.id}`));
-        }
-        res.send(employee);
-    } catch (e) {
-        return next({ message: "Something is wrong with getting employee" });
+    const employee = Employee.getById(req.params.id);
+    if (!employee) {
+        return next(ApiError.notFound(`Can't find employee: ${req.params.id}`));
     }
+
+    res.send(employee);
 }
 
 const editEmployee = (req, res, next) => {
-    try {
-        const employee = req.body;
-        const id = req.params.id;
+    const employee = req.body;
+    const id = req.params.id;
 
-        employee.id = id;
-        const isUpdated = Employee.update(employee);
+    employee.id = id;
+    const isUpdated = Employee.update(employee);
 
-        if (!isUpdated) {
-            return next(ApiError.notFound("Can't find and update employee, check the user's id"));
-        }
-
-        res.redirect(`/employees/${id}`);
-    } catch (e) {
-        return next({ message: "Something is wrong in editing employee" });
+    if (!isUpdated) {
+        return next(ApiError.notFound(`Can't find and update employee: ${req.params.id}`));
     }
 
+    res.redirect(`/employees/${id}`);
 }
 
 // Only for development
