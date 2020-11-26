@@ -8,22 +8,20 @@ const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('rdb.json'));
 
+
 const login = async (req, res, next) => {
     const { login, password } = req.body;
     const employee = Employee.getByIdAllInfo(login);
 
     if (!employee || !(await bcrypt.compare(password, employee.password))) {
-        return next(ApiError.notFound("Employee was not found"));
+        return next(ApiError.notFound("The employee was not found"));
     }
 
-    const accessToken = jwt.sign(
-        { login },
-        config.get('jwtSecret'),
-        { expiresIn: config.get('tokenTime') }
-    );
+    const user = { login };
+    const accessToken = generateAccessToken(user);
 
     const refreshToken = jwt.sign(
-        { login },
+        user,
         config.get('jwtSecretRefresh'),
         { expiresIn: config.get('refreshTokenTime') }
     );
@@ -38,37 +36,41 @@ const login = async (req, res, next) => {
 }
 
 const generateNewToken = (req, res, next) => {
-    const refreshToken = req.body.token;
+    const refreshToken = req.body.refreshToken;
 
     if (!refreshToken) {
-        return next(ApiError.badRequest("Refresh Token hasn't been given"));
+        return next(ApiError.unauthorized("The refresh Token hasn't been given"));
     }
 
     const refreshTokens = db.get('refreshTokens').value();
 
     if (!refreshTokens.includes(refreshToken)) {
-        return next(ApiError.badRequest("Refresh token doesn't exist"));
+        return next(ApiError.forbidden("The refresh token provided doesn't exist"));
     }
 
-    jwt.verify(refreshToken, config.jwtSecretRefresh, (err, login) => {
+    jwt.verify(refreshToken, config.jwtSecretRefresh, (err, user) => {
         if (err) {
-            return next(ApiError.forbidden("Can't verify refresh token"));
+            return next(ApiError.forbidden("Can't verify the refresh token"));
         }
 
-        const accessToken = jwt.sign(
-            { login },
-            config.get('jwtSecret'),
-            { expiresIn: config.get('tokenTime') }
-        );
-
+        const accessToken = generateAccessToken({ user: user.login });
         res.json({ accessToken });
     });
 }
 
 const logout = (req, res) => {
-
     db.get('refreshTokens').pull(req.body.refreshToken).write();
-    res.json({ status: "Logged out" });
+    res.sendStatus(204);
+}
+
+const generateAccessToken = (user) => {
+    const accessToken = jwt.sign(
+        user,
+        config.get('jwtSecret'),
+        { expiresIn: config.get('tokenTime') }
+    );
+
+    return accessToken;
 }
 
 module.exports = {

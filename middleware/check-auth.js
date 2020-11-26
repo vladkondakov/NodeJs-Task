@@ -6,18 +6,18 @@ exports.checkAuth = function(req, res, next) {
     const authHeader = req.headers['authorization'];
 
     if (!authHeader) {
-        return next(ApiError.unauthorized("The request is unauthorized"));
+        return next(ApiError.unauthorized("The request is unauthorized."));
     }
     
     const bearerToken = authHeader.split(' ')[1];
     req.token = bearerToken;
 
-    jwt.verify(bearerToken, config.jwtSecret, (err, login) => {
+    jwt.verify(bearerToken, config.jwtSecret, (err, user) => {
         if (err) {
-            return next(ApiError.forbidden("Can't verify token"));
-        }    
-        
-        req.login = login;
+            return next(ApiError.forbidden("The access token provided has expired."));
+        }
+
+        req.user = user;
         return next();
     })
 }
