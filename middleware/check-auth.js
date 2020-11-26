@@ -16,7 +16,6 @@ exports.checkAuth = function(req, res, next) {
         if (err) {
             return next(ApiError.forbidden("The access token provided has expired."));
         }
-
         req.user = user;
         return next();
     })

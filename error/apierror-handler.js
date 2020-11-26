@@ -17,14 +17,14 @@ ${err.stack}
     `);
 
     if (!(err instanceof ApiError)) {
-        return res.status(500).json({ 
-            statusCode: '500',
+        return res.status(err.statusCode).json({ 
             message: err.message 
         });
     }
     
     if (err.shouldRedirect) {
-        return res.status(err.statusCode).send(err.message) 
+        return res.status(err.payload.statusCode).json({ payload: err.payload });
+        // return res.redirect('/employees/errorPage'); 
     } 
 
     return res.status(err.statusCode).send(err.payload);

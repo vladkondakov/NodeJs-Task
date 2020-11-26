@@ -1,8 +1,8 @@
 const router = require('express').Router();
+const ApiError = require("../error/apierror");
 
 router.get('', (req, res, next) => {
-    const err = new Error(`${req.ip} tried to get page which doesn't exist`);
-    err.statusCode = 404;
+    const err = ApiError.notFound(`${req.ip} tried to get page which doesn't exist`);
     err.shouldRedirect = true;
 
     return next(err);

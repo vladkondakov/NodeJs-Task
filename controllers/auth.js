@@ -14,7 +14,7 @@ const login = async (req, res, next) => {
     const employee = Employee.getByIdAllInfo(login);
 
     if (!employee || !(await bcrypt.compare(password, employee.password))) {
-        return next(ApiError.notFound("The employee was not found"));
+        return next(ApiError.notFound("The employee was not found."));
     }
 
     const user = { login };
@@ -39,18 +39,18 @@ const generateNewToken = (req, res, next) => {
     const refreshToken = req.body.refreshToken;
 
     if (!refreshToken) {
-        return next(ApiError.unauthorized("The refresh Token hasn't been given"));
+        return next(ApiError.unauthorized("The refresh Token hasn't been given."));
     }
 
     const refreshTokens = db.get('refreshTokens').value();
 
     if (!refreshTokens.includes(refreshToken)) {
-        return next(ApiError.forbidden("The refresh token provided doesn't exist"));
+        return next(ApiError.forbidden("The refresh token provided doesn't exist."));
     }
 
     jwt.verify(refreshToken, config.jwtSecretRefresh, (err, user) => {
         if (err) {
-            return next(ApiError.forbidden("Can't verify the refresh token"));
+            return next(ApiError.forbidden("Can't verify the refresh token."));
         }
 
         const accessToken = generateAccessToken({ user: user.login });
