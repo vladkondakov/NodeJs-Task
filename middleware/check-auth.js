@@ -4,6 +4,7 @@ const ApiError = require('../error/apierror');
 
 exports.checkAuth = function(req, res, next) {
     const authHeader = req.headers['authorization'];
+
     if (!authHeader) {
         return next(ApiError.unauthorized("The request is unauthorized"));
     }

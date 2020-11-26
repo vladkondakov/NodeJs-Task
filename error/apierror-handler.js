@@ -21,11 +21,13 @@ ${err.stack}
             statusCode: '500',
             message: err.message 
         });
-    } else if (err.shouldRedirect) {
-        return res.status(err.statusCode).send(err.message) 
-    } else {
-        return res.status(err.statusCode).send(err.payload);
     }
+    
+    if (err.shouldRedirect) {
+        return res.status(err.statusCode).send(err.message) 
+    } 
+
+    return res.status(err.statusCode).send(err.payload);
 }
 
 module.exports = apiErrorHandler;

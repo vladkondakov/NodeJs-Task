@@ -1,16 +1,9 @@
 const router = require('express').Router()
-const { check } = require('express-validator')
 const AuthController = require('../controllers/auth')
+const { authValidation } = require('../middleware/auth-validation')
 
 // POST /auth
-router.post(
-    '/',
-    [
-        check('login').exists(),
-        check('password').exists()
-    ],
-    AuthController.login
-)
+router.post('/', authValidation, AuthController.login)
 
 // POST /auth/refresh
 router.post('/refresh', AuthController.generateNewToken)
