@@ -8,7 +8,7 @@ exports.authValidation = async function (req, res, next) {
             return next();
         })
         .catch((e) => {
-            const err = ApiError.badRequest(`Wrong login or password syntax: ${e.message}`);
+            const err = ApiError.badRequest(`Something wrong with login or password: ${e.message}.`);
             return next(err);
         });
 

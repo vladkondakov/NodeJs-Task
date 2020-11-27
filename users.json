@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "type": "user",
+      "id": "vkondakov",
+      "password": "$2a$12$E5ovx91fmULSQ4JlhRcs1eqWMcsXyVQI8xfjgtMhJph.Xfflrf.ea"
+    },
+    {
+      "type": "user",
+      "id": "skochetkov",
+      "password": "$2a$12$mfFW1auPlT/kkI0B.JxFDeqiY1JGBTTm/A3oTUe1Th8evEbG0yc8."
+    }
+  ]
+}

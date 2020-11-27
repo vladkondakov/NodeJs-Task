@@ -2,21 +2,15 @@ const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('db.json'));
 const ApiError = require('../error/apierror');
-
 const { employeeMapper } = require('../helpers/employee-mapper')
 
 class Employee {
     static getById(id) {
-        const employee = db.get('employees').find({ id }).value()
+        const employee = db.get('employees').find({ id }).value();
         if (!employee) {
-            throw ApiError.notFound(`Can't find employee: ${id}.`);
+            throw ApiError.badRequest(`Can't find employee: ${id}.`);
         }
         return employeeMapper(employee);
-    }
-
-    static getByIdAllInfo(id) {
-        const employee = db.get('employees').find({ id }).value();
-        return employee;
     }
 
     static update(employee) {
@@ -87,8 +81,8 @@ class Employee {
         return results;
     }
 
-    save() {
-        db.get('employees').push(this)
+    static save(employee) {
+        db.get('employees').push(employee).write();
     }
 
 }

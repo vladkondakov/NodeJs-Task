@@ -33,6 +33,10 @@ class ApiError extends Error {
         return new ApiError(404, payload);
     }
 
+    setNewMessage(msg) {
+        this.payload.message = msg;
+    }
+
     // static conflict(msg) {
     //     return new ApiError(409, msg);
     // }

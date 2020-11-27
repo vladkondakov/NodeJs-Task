@@ -1,28 +1,26 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const Employee = require('../service/employee-service');
 const ApiError = require('../error/apierror');
 
 const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('rdb.json'));
+const usersDatabase = lowDb(new FileSync('users.json'));
 
 // db for users
 const login = async (req, res, next) => {
     const { login, password } = req.body;
-    const employee = Employee.getByIdAllInfo(login);
+    const user = usersDatabase.get('users').find({ id: login }).value();
 
-    if (!employee || !(await bcrypt.compare(password, employee.password))) {
-        // 
-        return next(ApiError.notFound("Login or password ."));
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+        return next(ApiError.badRequest("Login or password are wrong."));
     }
 
-    const user = { login };
-    const accessToken = generateAccessToken(user);
+    const accessToken = generateAccessToken({ userName: login });
 
     const refreshToken = jwt.sign(
-        user,
+        { userName: login },
         config.get('jwtSecretRefresh'),
         { expiresIn: config.get('refreshTokenTime') }
     );
@@ -44,7 +42,6 @@ const generateNewToken = (req, res, next) => {
     }
 
     const refreshTokens = db.get('refreshTokens').value();
-
     if (!refreshTokens.includes(refreshToken)) {
         return next(ApiError.forbidden("The refresh token provided doesn't exist."));
     }
@@ -53,8 +50,8 @@ const generateNewToken = (req, res, next) => {
         if (err) {
             return next(ApiError.forbidden("Can't verify the refresh token."));
         }
+        const accessToken = generateAccessToken(user);
 
-        const accessToken = generateAccessToken({ user: user.login });
         res.json({ accessToken });
     });
 }
@@ -64,9 +61,9 @@ const logout = (req, res) => {
     res.sendStatus(204);
 }
 
-const generateAccessToken = (user) => {
+const generateAccessToken = (payload) => {
     const accessToken = jwt.sign(
-        user,
+        {userName: payload.userName},
         config.get('jwtSecret'),
         { expiresIn: config.get('tokenTime') }
     );

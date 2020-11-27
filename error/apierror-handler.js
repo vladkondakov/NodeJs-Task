@@ -24,7 +24,6 @@ ${err.stack}
     
     if (err.shouldRedirect) {
         return res.status(err.payload.statusCode).json({ payload: err.payload });
-        // return res.redirect('/employees/errorPage'); 
     } 
 
     return res.status(err.statusCode).send(err.payload);
