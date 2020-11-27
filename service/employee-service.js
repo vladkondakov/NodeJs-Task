@@ -30,28 +30,24 @@ class Employee {
         return results;
     }
 
-    // rewrite
+    // if name or surname are not defined we pass the empty strings
     static getFilteredEmployees(name, surname) {
         const employees = this.getAllEmployees();
 
         if (!name && !surname) {
             return employees;
         }
+        
+        const regName = new RegExp(name, 'i');
+        const regSurname = new RegExp(surname, 'i')
 
         const filteredEmployees = employees.filter(employee => {
-            const isNamesEquals = employee.name.toLowerCase() === name.toLowerCase();
-            const isSurnamesEquals = employee.surname.toLowerCase() === surname.toLowerCase();
+            const isNamesMatch = regName.test(employee.name);
+            const isSurnamesMatch = regSurname.test(employee.surname);
 
-            if (name) {
-                if (surname) {
-                    return isNamesEquals && isSurnamesEquals;
-                }
-                return isNamesEquals;
-            } else if (surname) {
-                return isSurnamesEquals;
-            }
-        });
-
+            return (isNamesMatch && isSurnamesMatch);
+        })
+        
         return filteredEmployees;
     }
 
