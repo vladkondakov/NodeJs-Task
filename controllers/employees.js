@@ -1,45 +1,41 @@
 const Employee = require('../service/employee-service');
 const bcrypt = require('bcryptjs');
 const ApiError = require('../error/apierror');
+const config = require('config');
 
 const getPageEmployees = (req, res, next) => {
-    const offset = parseInt(req.query.offset) || 1;
-    const limit = parseInt(req.query.limit) || 25;
+    const offset = +req.query.offset || config.get('offset');
+    const limit = +req.query.limit || config.get('limit');
     const order = req.query.order;
-    const name = req.query.name || "";
-    const surname = req.query.surname || "";
+    const { name, surname } = req.query;
 
-    try {
-        const filteredEmployees = Employee.getFilteredEmployees(name, surname);
-        const sortedEmployees = Employee.getSortedEmployees(filteredEmployees, order);
-        const pageEmployees = Employee.getPageEmployees(sortedEmployees, offset, limit);
-        res.json({ pageEmployees });
-    } catch (e) {
-        return next({ message: "Can't get employees" });
-    }
+    const filteredEmployees = Employee.getFilteredEmployees(name, surname);
+    const sortedEmployees = Employee.getSortedEmployees(filteredEmployees, order);
+    const pageEmployees = Employee.getPageEmployees(sortedEmployees, offset, limit);
+
+    return res.json({ pageEmployees });
 }
 
 const getEmployee = (req, res, next) => {
-    const employee = Employee.getById(req.params.id);
-    if (!employee) {
-        return next(ApiError.notFound(`Can't find employee: ${req.params.id}.`));
+    try {
+        const employee = Employee.getById(req.params.id);
+        return res.send(employee);
+    } catch (e) {
+        return next(e);
     }
-
-    res.send(employee);
 }
 
 const editEmployee = (req, res, next) => {
     const employee = req.body;
     const id = req.params.id;
-
     employee.id = id;
-    const isUpdated = Employee.update(employee);
 
-    if (!isUpdated) {
+    try {
+        Employee.update(employee);
+        return res.redirect(`/employees/${id}`);
+    } catch (e) {
         return next(ApiError.notFound(`Can't find and update employee: ${req.params.id}.`));
     }
-
-    res.redirect(`/employees/${id}`);
 }
 
 // Only for development

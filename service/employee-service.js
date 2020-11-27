@@ -1,14 +1,17 @@
 const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('db.json'));
+const ApiError = require('../error/apierror');
 
 const { employeeMapper } = require('../helpers/employee-mapper')
 
 class Employee {
     static getById(id) {
         const employee = db.get('employees').find({ id }).value()
-        const res = employee ? employeeMapper(employee) : employee;
-        return res
+        if (!employee) {
+            throw ApiError.notFound(`Can't find employee: ${id}.`);
+        }
+        return employeeMapper(employee);
     }
 
     static getByIdAllInfo(id) {
@@ -18,13 +21,7 @@ class Employee {
 
     static update(employee) {
         const res = this.getById(employee.id);
-        let isUpdated = false;
-
-        if (res) {
-            db.get('employees').find({ id: employee.id }).assign(employee).write();
-            return !isUpdated
-        }
-        return isUpdated;
+        db.get('employees').find({ id: employee.id }).assign(employee).write();
     }
 
     static getAllEmployees() {
@@ -33,6 +30,7 @@ class Employee {
         return results;
     }
 
+    // rewrite
     static getFilteredEmployees(name, surname) {
         const employees = this.getAllEmployees();
 
@@ -48,7 +46,6 @@ class Employee {
                 if (surname) {
                     return isNamesEquals && isSurnamesEquals;
                 }
-
                 return isNamesEquals;
             } else if (surname) {
                 return isSurnamesEquals;

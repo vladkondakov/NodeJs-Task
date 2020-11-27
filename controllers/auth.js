@@ -8,13 +8,14 @@ const lowDb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const db = lowDb(new FileSync('rdb.json'));
 
-
+// db for users
 const login = async (req, res, next) => {
     const { login, password } = req.body;
     const employee = Employee.getByIdAllInfo(login);
 
     if (!employee || !(await bcrypt.compare(password, employee.password))) {
-        return next(ApiError.notFound("The employee was not found."));
+        // 
+        return next(ApiError.notFound("Login or password ."));
     }
 
     const user = { login };
